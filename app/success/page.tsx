@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Check, Mail, MessageCircle, Sparkles, Copy, Loader2, X, Play, Youtube } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
-export default function SuccessPage() {
+function SuccessPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState(false);
@@ -365,5 +365,17 @@ export default function SuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 dark:from-gray-950 dark:to-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-600 dark:text-gray-400" />
+      </div>
+    }>
+      <SuccessPageContent />
+    </Suspense>
   );
 }
