@@ -45,11 +45,14 @@ class OrkutClient {
     if (!this.proxy) return undefined;
     
     try {
-      // Parse proxy URL: http://username:password@host:port
-      const proxyUrl = new URL(this.proxy);
       const { HttpsProxyAgent } = require('https-proxy-agent');
+      const agent = new HttpsProxyAgent(this.proxy);
       
-      return new HttpsProxyAgent(this.proxy);
+      // Log proxy configuration (sanitized)
+      const proxyHost = this.proxy.split('@')[1] || 'unknown';
+      console.log('[ORKUT] Proxy configured:', proxyHost);
+      
+      return agent;
     } catch (error) {
       console.error('[ORKUT] Proxy configuration error:', error);
       return undefined;
@@ -91,11 +94,20 @@ class OrkutClient {
     if (proxyAgent) {
       fetchOptions.agent = proxyAgent;
       console.log('[ORKUT] Using proxy for triggerAccountAndMenu');
+    } else {
+      console.log('[ORKUT] No proxy configured, using direct connection');
     }
 
-    const response = await fetch(`${this.baseUrl}/qris/menu/${id}`, fetchOptions);
-
-    return response.json();
+    try {
+      const response = await fetch(`${this.baseUrl}/qris/menu/${id}`, fetchOptions);
+      console.log('[ORKUT] triggerAccountAndMenu response status:', response.status);
+      
+      const data = await response.json();
+      return data;
+    } catch (error: any) {
+      console.error('[ORKUT] triggerAccountAndMenu error:', error.message);
+      throw error;
+    }
   }
 
   async getMutasiQris(): Promise<any> {
@@ -137,16 +149,23 @@ class OrkutClient {
     if (proxyAgent) {
       fetchOptions.agent = proxyAgent;
       console.log('[ORKUT] Using proxy for getMutasiQris');
+    } else {
+      console.log('[ORKUT] No proxy configured for getMutasiQris');
     }
 
-    const response = await fetch(`${this.baseUrl}/qris/mutasi/${id}`, fetchOptions);
-    const data = await response.json();
-    
-    // Debug logging
-    console.log('[ORKUT] API Response Status:', response.status);
-    console.log('[ORKUT] API Response Data:', JSON.stringify(data, null, 2));
+    try {
+      const response = await fetch(`${this.baseUrl}/qris/mutasi/${id}`, fetchOptions);
+      const data = await response.json();
+      
+      // Debug logging
+      console.log('[ORKUT] getMutasiQris response status:', response.status);
+      console.log('[ORKUT] getMutasiQris response data:', JSON.stringify(data, null, 2));
 
-    return data;
+      return data;
+    } catch (error: any) {
+      console.error('[ORKUT] getMutasiQris error:', error.message);
+      throw error;
+    }
   }
 
   async checkPaymentStatus(params: CheckPaymentParams): Promise<OrkutPaymentStatus> {
