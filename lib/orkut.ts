@@ -140,8 +140,13 @@ class OrkutClient {
     }
 
     const response = await fetch(`${this.baseUrl}/qris/mutasi/${id}`, fetchOptions);
+    const data = await response.json();
+    
+    // Debug logging
+    console.log('[ORKUT] API Response Status:', response.status);
+    console.log('[ORKUT] API Response Data:', JSON.stringify(data, null, 2));
 
-    return response.json();
+    return data;
   }
 
   async checkPaymentStatus(params: CheckPaymentParams): Promise<OrkutPaymentStatus> {
