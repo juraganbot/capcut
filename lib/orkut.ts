@@ -111,69 +111,32 @@ class OrkutClient {
   }
 
   async getMutasiQris(): Promise<any> {
-    const id = this.getId();
-    const timestamp = Date.now().toString();
+    console.log('[ORKUT] Using 3rd party API for mutations');
     
-    const params = new URLSearchParams({
-      app_reg_id: this.appRegId,
-      phone_uuid: 'dCkcjSj0RSmAIGe8RAjTpO',
-      phone_model: 'KM6',
-      'requests[qris_history][keterangan]': '',
-      'requests[qris_history][jumlah]': '',
-      request_time: timestamp,
-      phone_android_version: '9',
-      app_version_code: '250911',
-      auth_username: this.username,
-      'requests[qris_history][page]': '1',
-      auth_token: this.token,
-      app_version_name: '25.09.11',
-      ui_mode: 'light',
-      'requests[qris_history][dari_tanggal]': '',
-      'requests[0]': 'account',
-      'requests[qris_history][ke_tanggal]': ''
-    });
-
-    const fetchOptions: any = {
-      method: 'POST',
-      headers: {
-        'signature': '2f2d096a8605ada7e7ec7bc482631de52af9089c1893469fa6040b76843a2f43df77994bd0ed58ef6a3f1fe4235f26d191095127613fcb87d9772ad77759e8ee',
-        'timestamp': timestamp,
-        'content-type': 'application/x-www-form-urlencoded',
-        'host': 'app.orderkuota.com',
-        'User-Agent': 'okhttp/4.12.0',
-      },
-      body: params.toString(),
-    };
-
-    const proxyAgent = this.getProxyAgent();
-    if (proxyAgent) {
-      fetchOptions.agent = proxyAgent;
-      console.log('[ORKUT] Using proxy for getMutasiQris');
-    } else {
-      console.log('[ORKUT] No proxy configured for getMutasiQris');
-    }
-
     try {
-      const response = await fetch(`${this.baseUrl}/qris/mutasi/${id}`, fetchOptions);
+      const response = await fetch('https://bot.waroengkubusiness.workers.dev/', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'CapCut-Pro/1.0',
+        },
+      });
+      
       const data = await response.json();
       
       // Debug logging
-      console.log('[ORKUT] getMutasiQris response status:', response.status);
-      console.log('[ORKUT] getMutasiQris response data:', JSON.stringify(data, null, 2));
+      console.log('[ORKUT] 3rd party API response status:', response.status);
+      console.log('[ORKUT] 3rd party API response:', JSON.stringify(data, null, 2));
 
       return data;
     } catch (error: any) {
-      console.error('[ORKUT] getMutasiQris error:', error.message);
+      console.error('[ORKUT] 3rd party API error:', error.message);
       throw error;
     }
   }
 
   async checkPaymentStatus(params: CheckPaymentParams): Promise<OrkutPaymentStatus> {
     try {
-      console.log('[ORKUT] Triggering account and menu...');
-      await this.triggerAccountAndMenu();
-      
-      console.log('[ORKUT] Getting QRIS mutations...');
+      console.log('[ORKUT] Getting QRIS mutations from 3rd party API...');
       const qrisData = await this.getMutasiQris();
 
       if (!qrisData || !qrisData.qris_history || !Array.isArray(qrisData.qris_history.results)) {
