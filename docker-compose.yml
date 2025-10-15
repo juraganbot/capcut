@@ -1,0 +1,53 @@
+# Docker Compose for local testing
+# This simulates Easypanel environment
+
+version: '3.8'
+
+services:
+  capcut-pro:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: capcut-pro
+    ports:
+      - "3000:3000"
+    environment:
+      # MongoDB
+      - MONGODB_URI=${MONGODB_URI}
+      
+      # Orkut API
+      - USERNAMEORKUT=${USERNAMEORKUT}
+      - TOKEN=${TOKEN}
+      - QRCODE_TEXT=${QRCODE_TEXT}
+      
+      # Proxy (required if outside Indonesia)
+      - PROXY_URL=${PROXY_URL}
+      
+      # Telegram
+      - BOT_TOKEN=${BOT_TOKEN}
+      - NOTIFICATION_GROUP_ID=${NOTIFICATION_GROUP_ID}
+      
+      # Security
+      - SESSION_SECRET=${SESSION_SECRET}
+      - NEXT_PUBLIC_ADMIN_PASSWORD=${NEXT_PUBLIC_ADMIN_PASSWORD}
+      
+      # Payment
+      - PAYMENT_AMOUNT=${PAYMENT_AMOUNT:-20000}
+      
+      # Deployment
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
+      - NODE_ENV=production
+      
+    restart: unless-stopped
+    networks:
+      - capcut-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  capcut-network:
+    driver: bridge
